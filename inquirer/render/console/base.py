@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from blessings import Terminal
+from blessed import Terminal
 
 
 class BaseConsoleRender(object):

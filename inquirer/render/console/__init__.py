@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 import sys
-from blessings import Terminal
+from blessed import Terminal
 
 from inquirer import errors
 from inquirer import events
@@ -68,13 +68,22 @@ class ConsoleRender(object):
 
     def _print_header(self, render):
         base = render.get_header()
+        current_value = render.get_current_value()
 
-        header = (base[:self.width - 9] + '...'
-                  if len(base) > self.width - 6
-                  else base)
-        header += ': {c}'.format(c=render.get_current_value())
+        lines_to_move_up = (len(base) + len(current_value) + 6) / self.width + 1
+        if len(base)+len(current_value)+6 % self.width == 0:
+            lines_to_move_up = lines_to_move_up - 1
+        terminal_move_up = ""
+        for i in range(lines_to_move_up):
+            terminal_move_up += "\n{t.move_up}"
+
+        #header = (base[:self.width - 9] + '...'
+        #          if len(base) > self.width - 6
+        #          else base)
+        header = base
+        header += ': {c}'.format(c=current_value)
         self.print_str(
-            '\n{t.move_up}{t.clear_eol}[{t.yellow}?{t.normal}] {msg}',
+            terminal_move_up + '{t.clear_eol}[{t.yellow}?{t.normal}] {msg}',
             msg=header,
             lf=not render.title_inline)
 

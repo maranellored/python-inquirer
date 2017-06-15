@@ -39,6 +39,7 @@ class ConsoleRender(object):
             print('')
 
     def _event_loop(self, render):
+        self._initial_prompt = True
         try:
             while True:
                 self._relocate()
@@ -70,12 +71,17 @@ class ConsoleRender(object):
         base = render.get_header()
         current_value = render.get_current_value()
 
-        lines_to_move_up = (len(base) + len(current_value) + 6) / self.width + 1
-        if len(base)+len(current_value)+6 % self.width == 0:
-            lines_to_move_up = lines_to_move_up - 1
-        terminal_move_up = ""
+        if (self._initial_prompt):
+            lines_to_move_up = 1
+            self._initial_prompt = False
+        else:
+            lines_to_move_up = (len(base) + len(current_value) + 6) / self.width + 1
+            mod = (len(base)+len(current_value)+6) % self.width
+            if mod == 0 or mod == 1:
+                lines_to_move_up -= 1
+        terminal_move_up = "\n"
         for i in range(lines_to_move_up):
-            terminal_move_up += "\n{t.move_up}"
+            terminal_move_up += "{t.move_up}{t.clear_eol}"
 
         #header = (base[:self.width - 9] + '...'
         #          if len(base) > self.width - 6
@@ -83,7 +89,7 @@ class ConsoleRender(object):
         header = base
         header += ': {c}'.format(c=current_value)
         self.print_str(
-            terminal_move_up + '{t.clear_eol}[{t.yellow}?{t.normal}] {msg}',
+            terminal_move_up + '[{t.yellow}?{t.normal}] {msg}',
             msg=header,
             lf=not render.title_inline)
 
